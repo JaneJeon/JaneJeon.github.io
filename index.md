@@ -3,7 +3,7 @@ title: Analyzing the The Computer Language Benchmarks Game
 author: Jane Jeon
 ---
 
-I have always been interested in programming languages, and in particular, how they perform (or not). And no matter what you Googled, what kind of discussions you would get into on the issue, you would often see references to [Computer Language Benchmarks Game](http://benchmarksgame.alioth.debian.org/). Although far from perfect (for example, it seems to just `time` the programming running time, which meant that language runtimes that JIT compiled its code were inherently disadvantaged due to the warm-up time), it served as a de-facto starting point for discussions.
+I have always been interested in programming languages, and in particular, how they perform (or not). And no matter what you Googled, what kind of discussions you would get into on the issue, you would often see references to [Computer Language Benchmarks Game](http://benchmarksgame.alioth.debian.org/). Although far from perfect (for example, it seems to just `time` the program running time, which meant that language runtimes that JIT compiled its code were inherently disadvantaged due to the warm-up time), it served as a de-facto starting point for discussions.
 
 I have previously made efforts to try to analyze the data up on the site, including [this attempt](https://github.com/JaneJeon/Benchmark-Game-Summary) (which produces the report below) in which I literally just averaged the scores on each *lang1 vs. lang2* page, and as crude as it was (I *am* a college student strapped on time, after all), it gave me a *general* idea of the performance landscape, and I thought it was good enough *for now* and that maybe I'll get to properly exploring it later.
 
@@ -381,7 +381,7 @@ The same goes for Rust, beating out even grandaddy C (but consuming much more me
 
 And the rest are just scripting languages (interpreted), as expected. It's hard for the compiler/interpreter to optimize the running code when it doesn't know much. I'm not used to Racket, but it seems to be handily beating down everyone else in speed. I'm not sure what causes its comparatively high memory consumption, however.
 
-JRuby consumes *crazy* amounts of memory while not even being faster than ruby is... unfortunately expected, given the nature of these benchmarks, the JVM having an overhead, and JRuby abusing *invokedynamic*. However, [the JVM can be *blazing* fast - and I mean 9x faster peak speed than the reference implementation](https://github.com/mame/optcarrot/blob/master/doc/benchmark.md), as shown by the TruffleRuby implementation (based on the new JIT compiler - Graal - written in Java).
+JRuby consuming *crazy* amounts of memory while not even being faster than yarv is... unfortunately expected, given the nature of these benchmarks, the JVM having an overhead, and JRuby abusing *invokedynamic*. However, [the JVM can be *blazing* fast - and I mean 9x faster peak speed than the reference implementation](https://github.com/mame/optcarrot/blob/master/doc/benchmark.md), as shown by the TruffleRuby implementation (based on the new JIT compiler - Graal - written in Java).
 
 I thought python and ruby (yarv) would blow trades, but I was wrong, once again - python is clearly the faster and the more memory-efficient of the two. However, with Ruby 3x3 showing promising progress in the JIT department, I'll be looking forward to Ruby making strides beyond the current python performance line, at the very least.
 

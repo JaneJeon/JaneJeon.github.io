@@ -5,9 +5,13 @@ img {
 	text-align: center;
 }
 header {
-	padding-bottom: 0.5rem;
+	padding-bottom: 0.4rem;
 }
 .author {
 	margin-top: 0.4rem;
 	margin-bottom: 0.1rem;
+}
+footer {
+	padding-top: 1rem;
+	padding-bottom: 1rem;
 }
