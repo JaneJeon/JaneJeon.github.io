@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Jane Jeon" />
+  <title>Analyzing the The Computer Language Benchmarks Game</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; position: absolute; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; }
+pre.numberSource a.sourceLine:empty
+  { position: absolute; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <meta name='viewport' content='shrink-to-fit=no'>
+  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css'>
+  <link rel='stylesheet' href='css/lightbox.min.css'>
+  <style>
+  	img {
+  		max-width: 60%;
+  		max-height: 50vh;
+  	}
+  	/* TODO: stylize author & date */
+  </style>
+  <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+  <script>
+  	$(function() {
+  		$('a').attr('target', '_blank')
+  		var title = $('header').html()
+  		$('header').remove() // remove the stupid header tag from the title
+  		var body = $('body').html()
+  		$('body').html('<div class="container"></div>')
+  		$('.container').append(title, body) // and move the whole body inside a container
+  		// allow lightbox initialization - needs to come before loading the script
+  		// because we need <a><img></a>, not <img>, which is what pandoc generates
+  		$('img').each(function(index) {
+  			$(this).after('<a></a>') // TODO: how to limit the clicking area just to the image?
+  			var link = $(this).next()
+  			link.attr({
+  				href: $(this).attr('src'),
+  				'data-lightbox': 'image-'+index
+  			})
+  			var caption = $(this).attr('alt')
+  			if (caption) link.attr('data-title', caption)
+  			$(this).appendTo(link)
+  		}).addClass('rounded mx-auto d-block') // make images look nice
+  		$('figure').each(function() { // remove stupid figure & figcapture tags
+  			$(this).after('<p></p>')
+  			$(this).next().append($(this).find('a'))
+  			$(this).remove()
+  		})
+  	})
+  </script>
+  <script src='js/lightbox.min.js'></script>
+  <script>
+  	lightbox.option({
+  		fadeDuration: 300,
+  		imageFadeDuration: 300
+  	})
+  </script>
+</head>
+<body>
+<header>
+<h1 class="title">Analyzing the The Computer Language Benchmarks Game</h1>
+<p class="author">Jane Jeon</p>
+<p class="date">April 7, 2018, with &lt;3 from Dartmouth</p>
+</header>
+<p>I have always been interested in programming languages, and in particular, how they perform (or not). And no matter what you Googled, what kind of discussions you would get into on the issue, you would often see references to <a href="http://benchmarksgame.alioth.debian.org/">Computer Language Benchmarks Game</a>. Although far from perfect (for example, it seems to just <code>time</code> the programming running time, which meant that language runtimes that JIT compiled its code were inherently disadvantaged due to the warm-up time), it served as a de-facto starting point for discussions.</p>
+<p>I have previously made efforts to try to analyze the data up on the site, including <a href="https://github.com/JaneJeon/Benchmark-Game-Summary">this attempt</a> (which produces the report below) in which I literally just averaged the scores on each <em>lang1 vs. lang2</em> page, and as crude as it was (I <em>am</em> a college student strapped on time, after all), it gave me a <em>general</em> idea of the performance landscape, and I thought it was good enough <em>for now</em> and that maybe I’ll get to properly exploring it later.</p>
+<figure>
+<img src="assets/000.png" alt="The report generated by the crude summary project" /><figcaption>The report generated by the crude summary project</figcaption>
+</figure>
+<p>Well, that time came last week when <a href="https://www.reddit.com/r/programming/comments/88jg07/the_computer_language_benchmarks_games/">this bomb</a> dropped: it was set to go dark on May 1st, due to the hosting provider dropping its service. And if you visited the site at the time, it showed the announcement, along with a link to download the entire site (I was planning on using <code>httrack</code> anyway).</p>
+<p>And after downloading the site and sifting through its contents, I quickly noticed a couple of “data” files (literally):</p>
+<figure>
+<img src="assets/001.png" alt="Excuse the crude terminal screencap" /><figcaption>Excuse the crude terminal screencap</figcaption>
+</figure>
+<p>Being the simpleton I am, I took a quick look at the file sizes and chose to go with the biggest one. Yeah. I know. With the data, I had a couple of options: ingesting it through Excel (yuck), R (which I was still uncomfortable with), or just plain ol’ SQL. I went with SQL because I wanted to practice writing complex SQL queries anyway. So I ingested the data into a local PostgreSQL database, using the handy “Import Data From File” from DataGrip:</p>
+<figure>
+<img src="assets/002.png" alt="Right click on database to access the dropdown menu" /><figcaption>Right click on database to access the dropdown menu</figcaption>
+</figure>
+<p>And it gives you all sorts of options. Pretty neat! It even maps the data types and automatically creates a table for you. I basically didn’t touch anything other than to rename some fields to avoid having to quote them in SQL queries (yes, I’m lazy).</p>
+<figure>
+<img src="assets/003.png" alt="My final import options" /><figcaption>My final import options</figcaption>
+</figure>
+<p>With the data in the database, I explored some basic facts about the benchmark runs, starting with some innocent ones:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co">-- total benchmark runs</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">SELECT</span> <span class="fu">COUNT</span>(*)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">FROM</span> benchmarks;</a></code></pre></div>
+<p><img src="assets/004.png" /></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co">-- the languages tested</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">SELECT</span> <span class="kw">DISTINCT</span> lang</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="kw">ORDER</span> <span class="kw">BY</span> lang;</a></code></pre></div>
+<p><img src="assets/005.png" /></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co">-- exit codes (they&#39;re all successes)</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw">SELECT</span> <span class="kw">DISTINCT</span> status</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="kw">FROM</span> benchmarks;</a></code></pre></div>
+<p><img src="assets/006.png" /></p>
+<p>Looks like the data only contains successful runs.</p>
+<p>Then I looked deeper into the tests that were run, and as I was interested in <em>peak</em> performance, I pruned out the shorter test runs.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co">-- take the longest variations from each test</span></a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw">SELECT</span> test, <span class="fu">MAX</span>(n) <span class="kw">AS</span> n</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb4-4" data-line-number="4"><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb4-5" data-line-number="5"><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="dv">1</span>;</a></code></pre></div>
+<p><img src="assets/007.png" /></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co">-- average time, memory per max test</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw">SELECT</span> t1.test, t2.n                    <span class="kw">AS</span> max_n,</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">  <span class="fu">ROUND</span>(<span class="fu">AVG</span>(elapsed_secs):<span class="ch">:NUMERIC</span>, <span class="dv">2</span>)  <span class="kw">AS</span> secs,</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">  <span class="fu">ROUND</span>(<span class="fu">AVG</span>(mem_kb):<span class="ch">:NUMERIC</span> / <span class="dv">1000</span>, <span class="dv">2</span>) <span class="kw">AS</span> <span class="ot">&quot;mem(MB)&quot;</span></a>
+<a class="sourceLine" id="cb5-5" data-line-number="5"><span class="kw">FROM</span> benchmarks t1</a>
+<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb5-7" data-line-number="7">  <span class="kw">SELECT</span> test, <span class="fu">MAX</span>(n) <span class="kw">AS</span> n</a>
+<a class="sourceLine" id="cb5-8" data-line-number="8">  <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb5-9" data-line-number="9">  <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb5-10" data-line-number="10">) t2</a>
+<a class="sourceLine" id="cb5-11" data-line-number="11"><span class="kw">ON</span> t1.test = t2.test <span class="kw">AND</span> t1.n = t2.n</a>
+<a class="sourceLine" id="cb5-12" data-line-number="12"><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span>, <span class="dv">2</span>;</a></code></pre></div>
+<p><img src="assets/008.png" /></p>
+<p>However, when I tried to actually rank the languages, I quickly ran into a problem - mainly, not all languages had successfully running implementations for each test! This really skewed the rankings in favour of languages that only had ‘short’ implementations (scala is faster than C, haha - good one).</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co">-- get average time, memory per language (skewed!)</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw">SELECT</span> lang,</a>
+<a class="sourceLine" id="cb6-3" data-line-number="3">  <span class="fu">ROUND</span>(<span class="fu">AVG</span>(elapsed_secs):<span class="ch">:NUMERIC</span>, <span class="dv">2</span>)  <span class="kw">AS</span> secs,</a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">  <span class="fu">ROUND</span>(<span class="fu">AVG</span>(mem_kb):<span class="ch">:NUMERIC</span> / <span class="dv">1000</span>, <span class="dv">2</span>) <span class="kw">AS</span> <span class="ot">&quot;mem(MB)&quot;</span></a>
+<a class="sourceLine" id="cb6-5" data-line-number="5"><span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb6-6" data-line-number="6"><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb6-7" data-line-number="7"><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="dv">2</span>;</a></code></pre></div>
+<p><img src="assets/009.png" /></p>
+<p>So I tried to select languages that had successful implementations for <em>all</em> the tests… (the code is starting to look disgusting)</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co">-- select &quot;fully-tested&quot; languages only: ie. for each test &amp; n, the lang is tested</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="kw">SELECT</span> <span class="kw">DISTINCT</span> lang</a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb7-4" data-line-number="4"><span class="kw">WHERE</span> lang <span class="kw">NOT</span> <span class="kw">IN</span> (</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">  <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> l.lang</a>
+<a class="sourceLine" id="cb7-6" data-line-number="6">  <span class="kw">FROM</span> (</a>
+<a class="sourceLine" id="cb7-7" data-line-number="7">    <span class="kw">SELECT</span> t1.test, t1.n, t2.lang</a>
+<a class="sourceLine" id="cb7-8" data-line-number="8">    <span class="kw">FROM</span> (</a>
+<a class="sourceLine" id="cb7-9" data-line-number="9">      <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> test, n</a>
+<a class="sourceLine" id="cb7-10" data-line-number="10">      <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb7-11" data-line-number="11">    ) <span class="kw">AS</span> t1</a>
+<a class="sourceLine" id="cb7-12" data-line-number="12">    <span class="kw">CROSS</span> <span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb7-13" data-line-number="13">      <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> lang</a>
+<a class="sourceLine" id="cb7-14" data-line-number="14">      <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb7-15" data-line-number="15">    ) <span class="kw">AS</span> t2</a>
+<a class="sourceLine" id="cb7-16" data-line-number="16">  ) <span class="kw">AS</span> l</a>
+<a class="sourceLine" id="cb7-17" data-line-number="17">  <span class="kw">LEFT</span> <span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb7-18" data-line-number="18">    <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> test, n, lang</a>
+<a class="sourceLine" id="cb7-19" data-line-number="19">    <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb7-20" data-line-number="20">  ) <span class="kw">AS</span> r</a>
+<a class="sourceLine" id="cb7-21" data-line-number="21">  <span class="kw">ON</span> l.test = r.test <span class="kw">AND</span> l.n = r.n <span class="kw">AND</span> l.lang = r.lang</a>
+<a class="sourceLine" id="cb7-22" data-line-number="22">  <span class="kw">WHERE</span> r.lang <span class="kw">IS</span> <span class="kw">NULL</span></a>
+<a class="sourceLine" id="cb7-23" data-line-number="23">);</a></code></pre></div>
+<p><img src="assets/010.png" /></p>
+<p>…and the ones that had running implementations just for the <em>hardest</em> of tests.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co">-- select languages that are tested only in the hardest tests (the same!)</span></a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="kw">SELECT</span> <span class="kw">DISTINCT</span> lang</a>
+<a class="sourceLine" id="cb8-3" data-line-number="3"><span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb8-4" data-line-number="4"><span class="kw">WHERE</span> lang <span class="kw">NOT</span> <span class="kw">IN</span> (</a>
+<a class="sourceLine" id="cb8-5" data-line-number="5">  <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> l.lang</a>
+<a class="sourceLine" id="cb8-6" data-line-number="6">  <span class="kw">FROM</span> (</a>
+<a class="sourceLine" id="cb8-7" data-line-number="7">    <span class="kw">SELECT</span> t1.test, t1.max, t2.lang</a>
+<a class="sourceLine" id="cb8-8" data-line-number="8">    <span class="kw">FROM</span> (</a>
+<a class="sourceLine" id="cb8-9" data-line-number="9">      <span class="kw">SELECT</span> test, <span class="fu">MAX</span>(n) <span class="kw">AS</span> <span class="fu">max</span></a>
+<a class="sourceLine" id="cb8-10" data-line-number="10">      <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb8-11" data-line-number="11">      <span class="kw">GROUP</span> <span class="kw">BY</span> test</a>
+<a class="sourceLine" id="cb8-12" data-line-number="12">    ) <span class="kw">AS</span> t1</a>
+<a class="sourceLine" id="cb8-13" data-line-number="13">    <span class="kw">CROSS</span> <span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb8-14" data-line-number="14">      <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> lang</a>
+<a class="sourceLine" id="cb8-15" data-line-number="15">      <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb8-16" data-line-number="16">    ) <span class="kw">AS</span> t2</a>
+<a class="sourceLine" id="cb8-17" data-line-number="17">  ) <span class="kw">AS</span> l</a>
+<a class="sourceLine" id="cb8-18" data-line-number="18">  <span class="kw">LEFT</span> <span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb8-19" data-line-number="19">    <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> test, n, lang</a>
+<a class="sourceLine" id="cb8-20" data-line-number="20">    <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb8-21" data-line-number="21">  ) <span class="kw">AS</span> r</a>
+<a class="sourceLine" id="cb8-22" data-line-number="22">  <span class="kw">ON</span> l.test = r.test <span class="kw">AND</span> l.max = r.n <span class="kw">AND</span> l.lang = r.lang</a>
+<a class="sourceLine" id="cb8-23" data-line-number="23">  <span class="kw">WHERE</span> r.lang <span class="kw">IS</span> <span class="kw">NULL</span></a>
+<a class="sourceLine" id="cb8-24" data-line-number="24">);</a></code></pre></div>
+<p><img src="assets/010.png" /></p>
+<p>Huh. They’re the same. This probably indicates that there wasn’t a problem with any language’s implementations failing on higher <em>n</em>.</p>
+<p>By Frankensteining the code snippets from above, I tried to see how the performance was for languages that <em>did</em> have running implementations for all tests, for the hardest tests only:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="co">-- get the performance of fully-tested languages in the hardest tests</span></a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="kw">SELECT</span> t1.test, t2.lang, t2.secs, t2.mbytes</a>
+<a class="sourceLine" id="cb9-3" data-line-number="3"><span class="kw">FROM</span> (</a>
+<a class="sourceLine" id="cb9-4" data-line-number="4">  <span class="co">-- select hardest tests</span></a>
+<a class="sourceLine" id="cb9-5" data-line-number="5">  <span class="kw">SELECT</span> test, <span class="fu">MAX</span>(n) <span class="kw">AS</span> n</a>
+<a class="sourceLine" id="cb9-6" data-line-number="6">  <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb9-7" data-line-number="7">  <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb9-8" data-line-number="8">) t1</a>
+<a class="sourceLine" id="cb9-9" data-line-number="9"><span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb9-10" data-line-number="10">  <span class="co">-- keep out outliers outside of 2 standard deviations</span></a>
+<a class="sourceLine" id="cb9-11" data-line-number="11">  <span class="kw">WITH</span> bounds <span class="kw">AS</span> (</a>
+<a class="sourceLine" id="cb9-12" data-line-number="12">    <span class="kw">SELECT</span></a>
+<a class="sourceLine" id="cb9-13" data-line-number="13">      <span class="fu">AVG</span>(elapsed_secs) - <span class="dv">2</span> * <span class="fu">STDDEV_SAMP</span>(elapsed_secs) <span class="kw">AS</span> lower_secs,</a>
+<a class="sourceLine" id="cb9-14" data-line-number="14">      <span class="fu">AVG</span>(elapsed_secs) + <span class="dv">2</span> * <span class="fu">STDDEV_SAMP</span>(elapsed_secs) <span class="kw">AS</span> upper_secs,</a>
+<a class="sourceLine" id="cb9-15" data-line-number="15">      <span class="fu">AVG</span>(mem_kb) - <span class="dv">2</span> * <span class="fu">STDDEV_SAMP</span>(mem_kb) <span class="kw">AS</span> lower_mem,</a>
+<a class="sourceLine" id="cb9-16" data-line-number="16">      <span class="fu">AVG</span>(mem_kb) + <span class="dv">2</span> * <span class="fu">STDDEV_SAMP</span>(mem_kb) <span class="kw">AS</span> upper_mem</a>
+<a class="sourceLine" id="cb9-17" data-line-number="17">    <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb9-18" data-line-number="18">  )</a>
+<a class="sourceLine" id="cb9-19" data-line-number="19">  <span class="kw">SELECT</span> test, n, lang,</a>
+<a class="sourceLine" id="cb9-20" data-line-number="20">    <span class="fu">AVG</span>(elapsed_secs):<span class="ch">:NUMERIC</span>(<span class="dv">10</span>, <span class="dv">2</span>)   <span class="kw">AS</span> secs,</a>
+<a class="sourceLine" id="cb9-21" data-line-number="21">    (<span class="fu">AVG</span>(mem_kb)/ <span class="dv">1000</span>):<span class="ch">:NUMERIC</span>(<span class="dv">10</span>, <span class="dv">1</span>) <span class="kw">AS</span> mbytes</a>
+<a class="sourceLine" id="cb9-22" data-line-number="22">  <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb9-23" data-line-number="23">  <span class="kw">WHERE</span> elapsed_secs</a>
+<a class="sourceLine" id="cb9-24" data-line-number="24">    <span class="kw">BETWEEN</span> (<span class="kw">SELECT</span> lower_secs <span class="kw">FROM</span> bounds)</a>
+<a class="sourceLine" id="cb9-25" data-line-number="25">    <span class="kw">AND</span> (<span class="kw">SELECT</span> upper_secs <span class="kw">FROM</span> bounds)</a>
+<a class="sourceLine" id="cb9-26" data-line-number="26">  <span class="kw">AND</span> mem_kb</a>
+<a class="sourceLine" id="cb9-27" data-line-number="27">    <span class="kw">BETWEEN</span> (<span class="kw">SELECT</span> lower_mem <span class="kw">FROM</span> bounds)</a>
+<a class="sourceLine" id="cb9-28" data-line-number="28">    <span class="kw">AND</span> (<span class="kw">SELECT</span> upper_mem <span class="kw">FROM</span> bounds)</a>
+<a class="sourceLine" id="cb9-29" data-line-number="29">  <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span></a>
+<a class="sourceLine" id="cb9-30" data-line-number="30">) t2</a>
+<a class="sourceLine" id="cb9-31" data-line-number="31"><span class="kw">ON</span> t1.test = t2.test <span class="kw">AND</span> t1.n = t2.n</a>
+<a class="sourceLine" id="cb9-32" data-line-number="32"><span class="kw">WHERE</span> t2.lang <span class="kw">IN</span> (</a>
+<a class="sourceLine" id="cb9-33" data-line-number="33">  <span class="co">-- select languages that are tested only in the hardest tests</span></a>
+<a class="sourceLine" id="cb9-34" data-line-number="34">  <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> lang</a>
+<a class="sourceLine" id="cb9-35" data-line-number="35">  <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb9-36" data-line-number="36">  <span class="kw">WHERE</span> lang <span class="kw">NOT</span> <span class="kw">IN</span> (</a>
+<a class="sourceLine" id="cb9-37" data-line-number="37">    <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> l.lang</a>
+<a class="sourceLine" id="cb9-38" data-line-number="38">    <span class="kw">FROM</span> (</a>
+<a class="sourceLine" id="cb9-39" data-line-number="39">      <span class="kw">SELECT</span> t1.test, t1.max, t2.lang</a>
+<a class="sourceLine" id="cb9-40" data-line-number="40">      <span class="kw">FROM</span> (</a>
+<a class="sourceLine" id="cb9-41" data-line-number="41">        <span class="kw">SELECT</span> test, <span class="fu">MAX</span>(n) <span class="kw">AS</span> <span class="fu">max</span></a>
+<a class="sourceLine" id="cb9-42" data-line-number="42">        <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb9-43" data-line-number="43">        <span class="kw">GROUP</span> <span class="kw">BY</span> test</a>
+<a class="sourceLine" id="cb9-44" data-line-number="44">      ) <span class="kw">AS</span> t1</a>
+<a class="sourceLine" id="cb9-45" data-line-number="45">      <span class="kw">CROSS</span> <span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb9-46" data-line-number="46">        <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> lang</a>
+<a class="sourceLine" id="cb9-47" data-line-number="47">        <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb9-48" data-line-number="48">      ) <span class="kw">AS</span> t2</a>
+<a class="sourceLine" id="cb9-49" data-line-number="49">    ) <span class="kw">AS</span> l</a>
+<a class="sourceLine" id="cb9-50" data-line-number="50">    <span class="kw">LEFT</span> <span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb9-51" data-line-number="51">      <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> test, n, lang</a>
+<a class="sourceLine" id="cb9-52" data-line-number="52">      <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb9-53" data-line-number="53">    ) <span class="kw">AS</span> r</a>
+<a class="sourceLine" id="cb9-54" data-line-number="54">    <span class="kw">ON</span> l.test = r.test <span class="kw">AND</span> l.max = r.n <span class="kw">AND</span> l.lang = r.lang</a>
+<a class="sourceLine" id="cb9-55" data-line-number="55">    <span class="kw">WHERE</span> r.lang <span class="kw">IS</span> <span class="kw">NULL</span></a>
+<a class="sourceLine" id="cb9-56" data-line-number="56">  )</a>
+<a class="sourceLine" id="cb9-57" data-line-number="57">)</a>
+<a class="sourceLine" id="cb9-58" data-line-number="58"><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="dv">1</span>, <span class="dv">3</span>;</a></code></pre></div>
+<p><img src="assets/011.png" /></p>
+<p>Interesting results. You may have noticed that I had to take care of outliers in multiple test runs of the exact same benchmark, n, and language.</p>
+<p>Now let’s try to summarize the whole ranking.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co">-- summarize the performance of fully-tested languages in the hardest tests</span></a>
+<a class="sourceLine" id="cb10-2" data-line-number="2"><span class="kw">SELECT</span> t2.lang,</a>
+<a class="sourceLine" id="cb10-3" data-line-number="3">  <span class="co">-- using arithmetic mean</span></a>
+<a class="sourceLine" id="cb10-4" data-line-number="4">  <span class="fu">AVG</span>(t2.secs):<span class="ch">:NUMERIC</span>(<span class="dv">5</span>, <span class="dv">1</span>)            <span class="kw">AS</span> secs,</a>
+<a class="sourceLine" id="cb10-5" data-line-number="5">  (<span class="fu">AVG</span>(t2.mbytes) / <span class="dv">1000</span>):<span class="ch">:NUMERIC</span>(<span class="dv">5</span>, <span class="dv">1</span>) <span class="kw">AS</span> mbytes</a>
+<a class="sourceLine" id="cb10-6" data-line-number="6"><span class="kw">FROM</span> (</a>
+<a class="sourceLine" id="cb10-7" data-line-number="7">  <span class="co">-- select hardest tests</span></a>
+<a class="sourceLine" id="cb10-8" data-line-number="8">  <span class="kw">SELECT</span> test, <span class="fu">MAX</span>(n) <span class="kw">AS</span> n</a>
+<a class="sourceLine" id="cb10-9" data-line-number="9">  <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb10-10" data-line-number="10">  <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb10-11" data-line-number="11">) t1</a>
+<a class="sourceLine" id="cb10-12" data-line-number="12"><span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb10-13" data-line-number="13">  <span class="co">-- keep out outliers of test runs outside of 2 standard deviations</span></a>
+<a class="sourceLine" id="cb10-14" data-line-number="14">  <span class="kw">WITH</span> bounds <span class="kw">AS</span> (</a>
+<a class="sourceLine" id="cb10-15" data-line-number="15">    <span class="kw">SELECT</span></a>
+<a class="sourceLine" id="cb10-16" data-line-number="16">      <span class="fu">AVG</span>(elapsed_secs) - <span class="dv">2</span> * <span class="fu">STDDEV_SAMP</span>(elapsed_secs) <span class="kw">AS</span> lower_secs,</a>
+<a class="sourceLine" id="cb10-17" data-line-number="17">      <span class="fu">AVG</span>(elapsed_secs) + <span class="dv">2</span> * <span class="fu">STDDEV_SAMP</span>(elapsed_secs) <span class="kw">AS</span> upper_secs,</a>
+<a class="sourceLine" id="cb10-18" data-line-number="18">      <span class="fu">AVG</span>(mem_kb) - <span class="dv">2</span> * <span class="fu">STDDEV_SAMP</span>(mem_kb) <span class="kw">AS</span> lower_mem,</a>
+<a class="sourceLine" id="cb10-19" data-line-number="19">      <span class="fu">AVG</span>(mem_kb) + <span class="dv">2</span> * <span class="fu">STDDEV_SAMP</span>(mem_kb) <span class="kw">AS</span> upper_mem</a>
+<a class="sourceLine" id="cb10-20" data-line-number="20">    <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb10-21" data-line-number="21">  )</a>
+<a class="sourceLine" id="cb10-22" data-line-number="22">  <span class="kw">SELECT</span> test, n, lang,</a>
+<a class="sourceLine" id="cb10-23" data-line-number="23">    <span class="fu">AVG</span>(elapsed_secs) <span class="kw">AS</span> secs,</a>
+<a class="sourceLine" id="cb10-24" data-line-number="24">    <span class="fu">AVG</span>(mem_kb)       <span class="kw">AS</span> mbytes</a>
+<a class="sourceLine" id="cb10-25" data-line-number="25">  <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb10-26" data-line-number="26">  <span class="kw">WHERE</span> elapsed_secs</a>
+<a class="sourceLine" id="cb10-27" data-line-number="27">    <span class="kw">BETWEEN</span> (<span class="kw">SELECT</span> lower_secs <span class="kw">FROM</span> bounds)</a>
+<a class="sourceLine" id="cb10-28" data-line-number="28">    <span class="kw">AND</span> (<span class="kw">SELECT</span> upper_secs <span class="kw">FROM</span> bounds)</a>
+<a class="sourceLine" id="cb10-29" data-line-number="29">  <span class="kw">AND</span> mem_kb</a>
+<a class="sourceLine" id="cb10-30" data-line-number="30">    <span class="kw">BETWEEN</span> (<span class="kw">SELECT</span> lower_mem <span class="kw">FROM</span> bounds)</a>
+<a class="sourceLine" id="cb10-31" data-line-number="31">    <span class="kw">AND</span> (<span class="kw">SELECT</span> upper_mem <span class="kw">FROM</span> bounds)</a>
+<a class="sourceLine" id="cb10-32" data-line-number="32">  <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span></a>
+<a class="sourceLine" id="cb10-33" data-line-number="33">) t2</a>
+<a class="sourceLine" id="cb10-34" data-line-number="34"><span class="kw">ON</span> t1.test = t2.test <span class="kw">AND</span> t1.n = t2.n</a>
+<a class="sourceLine" id="cb10-35" data-line-number="35"><span class="kw">WHERE</span> t2.lang <span class="kw">IN</span> (</a>
+<a class="sourceLine" id="cb10-36" data-line-number="36">  <span class="co">-- select languages that are tested only in the hardest tests</span></a>
+<a class="sourceLine" id="cb10-37" data-line-number="37">  <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> lang</a>
+<a class="sourceLine" id="cb10-38" data-line-number="38">  <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb10-39" data-line-number="39">  <span class="kw">WHERE</span> lang <span class="kw">NOT</span> <span class="kw">IN</span> (</a>
+<a class="sourceLine" id="cb10-40" data-line-number="40">    <span class="co">-- select languages that *should* have rows</span></a>
+<a class="sourceLine" id="cb10-41" data-line-number="41">    <span class="co">-- according to the cross product of tests and languages</span></a>
+<a class="sourceLine" id="cb10-42" data-line-number="42">    <span class="co">-- but *doesn&#39;t* in the actual recorded test table</span></a>
+<a class="sourceLine" id="cb10-43" data-line-number="43">    <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> l.lang</a>
+<a class="sourceLine" id="cb10-44" data-line-number="44">    <span class="kw">FROM</span> (</a>
+<a class="sourceLine" id="cb10-45" data-line-number="45">      <span class="kw">SELECT</span> t1.test, t1.max, t2.lang</a>
+<a class="sourceLine" id="cb10-46" data-line-number="46">      <span class="kw">FROM</span> (</a>
+<a class="sourceLine" id="cb10-47" data-line-number="47">        <span class="kw">SELECT</span> test, <span class="fu">MAX</span>(n) <span class="kw">AS</span> <span class="fu">max</span></a>
+<a class="sourceLine" id="cb10-48" data-line-number="48">        <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb10-49" data-line-number="49">        <span class="kw">GROUP</span> <span class="kw">BY</span> test</a>
+<a class="sourceLine" id="cb10-50" data-line-number="50">      ) <span class="kw">AS</span> t1</a>
+<a class="sourceLine" id="cb10-51" data-line-number="51">      <span class="kw">CROSS</span> <span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb10-52" data-line-number="52">        <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> lang</a>
+<a class="sourceLine" id="cb10-53" data-line-number="53">        <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb10-54" data-line-number="54">      ) <span class="kw">AS</span> t2</a>
+<a class="sourceLine" id="cb10-55" data-line-number="55">    ) <span class="kw">AS</span> l</a>
+<a class="sourceLine" id="cb10-56" data-line-number="56">    <span class="kw">LEFT</span> <span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb10-57" data-line-number="57">      <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> test, n, lang</a>
+<a class="sourceLine" id="cb10-58" data-line-number="58">      <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb10-59" data-line-number="59">    ) <span class="kw">AS</span> r</a>
+<a class="sourceLine" id="cb10-60" data-line-number="60">    <span class="kw">ON</span> l.test = r.test <span class="kw">AND</span> l.max = r.n <span class="kw">AND</span> l.lang = r.lang</a>
+<a class="sourceLine" id="cb10-61" data-line-number="61">    <span class="kw">WHERE</span> r.lang <span class="kw">IS</span> <span class="kw">NULL</span></a>
+<a class="sourceLine" id="cb10-62" data-line-number="62">  )</a>
+<a class="sourceLine" id="cb10-63" data-line-number="63">)</a>
+<a class="sourceLine" id="cb10-64" data-line-number="64"><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb10-65" data-line-number="65"><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="dv">2</span>, <span class="dv">3</span>;</a></code></pre></div>
+<p><img src="assets/012.png" /></p>
+<p>Whoa, we’re getting some weird results (for one, golang most definitely <em>isn’t</em> faster than C). Given what we know about the average test durations from above, it seems like some of the tests (especially the more taxing ones) are skewing our results due to us taking the arithmetic mean of the results per language.</p>
+<p>Let’s try using geometric mean to summarize the results instead, using <a href="http://timothychenallen.blogspot.com/2006/03/sql-calculating-geometric-mean-geomean.html">some tricks</a> to simplify the implementation:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="co">-- summarize the performance of fully-tested languages in the hardest tests</span></a>
+<a class="sourceLine" id="cb11-2" data-line-number="2"><span class="kw">SELECT</span> t2.lang,</a>
+<a class="sourceLine" id="cb11-3" data-line-number="3">  <span class="co">-- take the geometric mean to account for the more extreme tests</span></a>
+<a class="sourceLine" id="cb11-4" data-line-number="4">  <span class="fu">EXP</span>(<span class="fu">AVG</span>(<span class="fu">LN</span>(t2.secs))):<span class="ch">:NUMERIC</span>(<span class="dv">5</span>, <span class="dv">1</span>)            <span class="kw">AS</span> secs,</a>
+<a class="sourceLine" id="cb11-5" data-line-number="5">  (<span class="fu">EXP</span>(<span class="fu">AVG</span>(<span class="fu">LN</span>(t2.mbytes))) / <span class="dv">1000</span>):<span class="ch">:NUMERIC</span>(<span class="dv">5</span>, <span class="dv">1</span>) <span class="kw">AS</span> mbytes</a>
+<a class="sourceLine" id="cb11-6" data-line-number="6"><span class="kw">FROM</span> (</a>
+<a class="sourceLine" id="cb11-7" data-line-number="7">  <span class="co">-- select hardest tests</span></a>
+<a class="sourceLine" id="cb11-8" data-line-number="8">  <span class="kw">SELECT</span> test, <span class="fu">MAX</span>(n) <span class="kw">AS</span> n</a>
+<a class="sourceLine" id="cb11-9" data-line-number="9">  <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb11-10" data-line-number="10">  <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb11-11" data-line-number="11">) t1</a>
+<a class="sourceLine" id="cb11-12" data-line-number="12"><span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb11-13" data-line-number="13">  <span class="co">-- keep out outliers of test runs outside of 2 standard deviations</span></a>
+<a class="sourceLine" id="cb11-14" data-line-number="14">  <span class="kw">WITH</span> bounds <span class="kw">AS</span> (</a>
+<a class="sourceLine" id="cb11-15" data-line-number="15">    <span class="kw">SELECT</span></a>
+<a class="sourceLine" id="cb11-16" data-line-number="16">      <span class="fu">AVG</span>(elapsed_secs) - <span class="dv">2</span> * <span class="fu">STDDEV_SAMP</span>(elapsed_secs) <span class="kw">AS</span> lower_secs,</a>
+<a class="sourceLine" id="cb11-17" data-line-number="17">      <span class="fu">AVG</span>(elapsed_secs) + <span class="dv">2</span> * <span class="fu">STDDEV_SAMP</span>(elapsed_secs) <span class="kw">AS</span> upper_secs,</a>
+<a class="sourceLine" id="cb11-18" data-line-number="18">      <span class="fu">AVG</span>(mem_kb) - <span class="dv">2</span> * <span class="fu">STDDEV_SAMP</span>(mem_kb) <span class="kw">AS</span> lower_mem,</a>
+<a class="sourceLine" id="cb11-19" data-line-number="19">      <span class="fu">AVG</span>(mem_kb) + <span class="dv">2</span> * <span class="fu">STDDEV_SAMP</span>(mem_kb) <span class="kw">AS</span> upper_mem</a>
+<a class="sourceLine" id="cb11-20" data-line-number="20">    <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb11-21" data-line-number="21">  )</a>
+<a class="sourceLine" id="cb11-22" data-line-number="22">  <span class="kw">SELECT</span> test, n, lang,</a>
+<a class="sourceLine" id="cb11-23" data-line-number="23">    <span class="fu">AVG</span>(elapsed_secs)          <span class="kw">AS</span> secs,</a>
+<a class="sourceLine" id="cb11-24" data-line-number="24">    <span class="fu">GREATEST</span>(<span class="fu">AVG</span>(mem_kb), <span class="fl">0.5</span>) <span class="kw">AS</span> mbytes</a>
+<a class="sourceLine" id="cb11-25" data-line-number="25">  <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb11-26" data-line-number="26">  <span class="kw">WHERE</span> elapsed_secs</a>
+<a class="sourceLine" id="cb11-27" data-line-number="27">    <span class="kw">BETWEEN</span> (<span class="kw">SELECT</span> lower_secs <span class="kw">FROM</span> bounds)</a>
+<a class="sourceLine" id="cb11-28" data-line-number="28">    <span class="kw">AND</span> (<span class="kw">SELECT</span> upper_secs <span class="kw">FROM</span> bounds)</a>
+<a class="sourceLine" id="cb11-29" data-line-number="29">  <span class="kw">AND</span> mem_kb</a>
+<a class="sourceLine" id="cb11-30" data-line-number="30">    <span class="kw">BETWEEN</span> (<span class="kw">SELECT</span> lower_mem <span class="kw">FROM</span> bounds)</a>
+<a class="sourceLine" id="cb11-31" data-line-number="31">    <span class="kw">AND</span> (<span class="kw">SELECT</span> upper_mem <span class="kw">FROM</span> bounds)</a>
+<a class="sourceLine" id="cb11-32" data-line-number="32">  <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span></a>
+<a class="sourceLine" id="cb11-33" data-line-number="33">) t2</a>
+<a class="sourceLine" id="cb11-34" data-line-number="34"><span class="kw">ON</span> t1.test = t2.test <span class="kw">AND</span> t1.n = t2.n</a>
+<a class="sourceLine" id="cb11-35" data-line-number="35"><span class="kw">WHERE</span> t2.lang <span class="kw">IN</span> (</a>
+<a class="sourceLine" id="cb11-36" data-line-number="36">  <span class="co">-- select languages that are tested only in the hardest tests</span></a>
+<a class="sourceLine" id="cb11-37" data-line-number="37">  <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> lang</a>
+<a class="sourceLine" id="cb11-38" data-line-number="38">  <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb11-39" data-line-number="39">  <span class="kw">WHERE</span> lang <span class="kw">NOT</span> <span class="kw">IN</span> (</a>
+<a class="sourceLine" id="cb11-40" data-line-number="40">    <span class="co">-- select languages that *should* have rows</span></a>
+<a class="sourceLine" id="cb11-41" data-line-number="41">    <span class="co">-- according to the cross product of tests and languages</span></a>
+<a class="sourceLine" id="cb11-42" data-line-number="42">    <span class="co">-- but *doesn&#39;t* in the actual recorded test table</span></a>
+<a class="sourceLine" id="cb11-43" data-line-number="43">    <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> l.lang</a>
+<a class="sourceLine" id="cb11-44" data-line-number="44">    <span class="kw">FROM</span> (</a>
+<a class="sourceLine" id="cb11-45" data-line-number="45">      <span class="kw">SELECT</span> t1.test, t1.max, t2.lang</a>
+<a class="sourceLine" id="cb11-46" data-line-number="46">      <span class="kw">FROM</span> (</a>
+<a class="sourceLine" id="cb11-47" data-line-number="47">        <span class="kw">SELECT</span> test, <span class="fu">MAX</span>(n) <span class="kw">AS</span> <span class="fu">max</span></a>
+<a class="sourceLine" id="cb11-48" data-line-number="48">        <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb11-49" data-line-number="49">        <span class="kw">GROUP</span> <span class="kw">BY</span> test</a>
+<a class="sourceLine" id="cb11-50" data-line-number="50">      ) <span class="kw">AS</span> t1</a>
+<a class="sourceLine" id="cb11-51" data-line-number="51">      <span class="kw">CROSS</span> <span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb11-52" data-line-number="52">        <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> lang</a>
+<a class="sourceLine" id="cb11-53" data-line-number="53">        <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb11-54" data-line-number="54">      ) <span class="kw">AS</span> t2</a>
+<a class="sourceLine" id="cb11-55" data-line-number="55">    ) <span class="kw">AS</span> l</a>
+<a class="sourceLine" id="cb11-56" data-line-number="56">    <span class="kw">LEFT</span> <span class="kw">JOIN</span> (</a>
+<a class="sourceLine" id="cb11-57" data-line-number="57">      <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> test, n, lang</a>
+<a class="sourceLine" id="cb11-58" data-line-number="58">      <span class="kw">FROM</span> benchmarks</a>
+<a class="sourceLine" id="cb11-59" data-line-number="59">    ) <span class="kw">AS</span> r</a>
+<a class="sourceLine" id="cb11-60" data-line-number="60">    <span class="kw">ON</span> l.test = r.test <span class="kw">AND</span> l.max = r.n <span class="kw">AND</span> l.lang = r.lang</a>
+<a class="sourceLine" id="cb11-61" data-line-number="61">    <span class="kw">WHERE</span> r.lang <span class="kw">IS</span> <span class="kw">NULL</span></a>
+<a class="sourceLine" id="cb11-62" data-line-number="62">  )</a>
+<a class="sourceLine" id="cb11-63" data-line-number="63">)</a>
+<a class="sourceLine" id="cb11-64" data-line-number="64"><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb11-65" data-line-number="65"><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="dv">2</span>, <span class="dv">3</span>;</a></code></pre></div>
+<p><img src="assets/013.png" /></p>
+<p>Now that’s more like it! Since I’m using geometric mean, the cases in which the memory consumed was reportedly 0kB (ie. rounded down to 0) threw errors in my face. To account for that, I set the memory consumption to simply 0.5kB in those cases.</p>
+<p>To me, several details popped out about this data. For one, what the heck is Chapel and why is it on the top of the list? <a href="https://en.wikipedia.org/wiki/Chapel_(programming_language)">A quick Googling</a> tells us that it’s some fancy language made by Cray (<em>that</em> company who makes supercomputers), and given that the tests were run on a quad-core machine, I guess its implementations of the tests took good advantage of the parallelism.</p>
+<p>The same goes for Rust, beating out even grandaddy C (but consuming much more memory) and coming in the number 2 spot. C ran at basically the same speed as C++ while using less memory, as expected. The next surprise is golang coming in so close to C++ in performance, and even beating it out in memory consumption! My understanding was that it basically traded blows with Java, but I guess that information is wrong! Java is basically where I’d expected it to be - ~2x slower than C/C++, while consuming a lot more memory (after all, it has a full VM to manage, with the overhead of countless objects in the heap).</p>
+<p>And the rest are just scripting languages (interpreted), as expected. It’s hard for the compiler/interpreter to optimize the running code when it doesn’t know much. I’m not used to Racket, but it seems to be handily beating down everyone else in speed. I’m not sure what causes its comparatively high memory consumption, however.</p>
+<p>JRuby consumes <em>crazy</em> amounts of memory while not even being faster than ruby is… unfortunately expected, given the nature of these benchmarks, the JVM having an overhead, and JRuby abusing <em>invokedynamic</em>. However, <a href="https://github.com/mame/optcarrot/blob/master/doc/benchmark.md">the JVM can be <em>blazing</em> fast - and I mean 9x faster peak speed than the reference implementation</a>, as shown by the TruffleRuby implementation (based on the new JIT compiler - Graal - written in Java).</p>
+<p>I thought python and ruby (yarv) would blow trades, but I was wrong, once again - python is clearly the faster and the more memory-efficient of the two. However, with Ruby 3x3 showing promising progress in the JIT department, I’ll be looking forward to Ruby making strides beyond the current python performance line, at the very least.</p>
+<p>Finally, surprising <em>literally nobody</em>, perl is dead last. Honestly, did anyone think it would end up anywhere else other than <em>dead last</em> when they first saw perl on the list halfway through the article?</p>
+<p>And that’s where I am with analyzing the Benchmark Game data! I still have a few ways to go - namely, taking into account of the languages that <em>didn’t</em> have implementations for all of the tests - and it’ll be an even more daunting task, I’m sure. However, as I’m just a college student with tight deadlines (in fact, I’ve got a paper due tomorrow morning), I will leave it here for now. I’ll perhaps pick this back up when I have time again.</p>
+<hr />
+<p>Funny afterword: although I got started with analyzing this data because of the threat of the website going down, as of time of writing this article, it seems someone else has started <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/">hosting the site again</a>. Well, I don’t think this effort was a waste. After all, if anything, it was a good learning experience.</p>
+</body>
+</html>
