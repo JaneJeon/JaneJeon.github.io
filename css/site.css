@@ -1,0 +1,13 @@
+img {
+	max-width: 60%;
+	max-height: 50vh;
+	box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2), 0 8px 26px 0 rgba(0, 0, 0, 0.19);
+	text-align: center;
+}
+header {
+	padding-bottom: 0.5rem;
+}
+.author {
+	margin-top: 0.4rem;
+	margin-bottom: 0.1rem;
+}

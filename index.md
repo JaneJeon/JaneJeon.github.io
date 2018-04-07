@@ -371,9 +371,9 @@ GROUP BY 1
 ORDER BY 2, 3;
 ```
 
-![](assets/013.png)
+![The final result! ...for now](assets/013.png)
 
-Now that's more like it! Since I'm using geometric mean, the cases in which the memory consumed was reportedly 0kB (ie. rounded down to 0) threw errors in my face. To account for that, I set the memory consumption to simply 0.5kB in those cases.
+Now that's more like it! Since I'm using geometric mean (and that involves taking the log of individual values), the cases in which the memory consumed was reportedly 0kB (ie. rounded down to 0) threw errors in my face. To account for that, I set the memory consumption to simply 0.5kB in those cases.
 
 To me, several details popped out about this data. For one, what the heck is Chapel and why is it on the top of the list? [A quick Googling](https://en.wikipedia.org/wiki/Chapel_(programming_language)) tells us that it's some fancy language made by Cray (*that* company who makes supercomputers), and given that the tests were run on a quad-core machine, I guess its implementations of the tests took good advantage of the parallelism.
 

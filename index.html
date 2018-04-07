@@ -77,59 +77,16 @@ code span.va { color: #19177c; } /* Variable */
 code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
+  <link rel="stylesheet" href="css/site.css">
   <!--[if lt IE 9]>
     <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
   <![endif]-->
   <meta name='viewport' content='shrink-to-fit=no'>
   <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css'>
   <link rel='stylesheet' href='css/lightbox.min.css'>
-  <style>
-  	img {
-  		max-width: 60%;
-  		max-height: 50vh;
-  		box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2), 0 8px 26px 0 rgba(0, 0, 0, 0.19);
-  		text-align: center;
-  	}
-  	/* TODO: stylize author & date */
-  </style>
-  <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
-  <script>
-  	$(function() {
-  		$('a').attr('target', '_blank')
-  		var title = $('header').html()
-  		$('header').remove() // remove the stupid header tag from the title
-  		var body = $('body').html()
-  		$('body').html('<div class="container"></div>')
-  		$('.container').append(title, body) // and move the whole body inside a container
-  		// allow lightbox initialization - needs to come before loading the script
-  		// because we need <a><img></a>, not <img>, which is what pandoc generates
-  		$('img').each(function(index) {
-  			$(this).after('<a></a>') // TODO: how to limit the clicking area just to the image?
-  			var link = $(this).next()
-  			link.attr({
-  				href: $(this).attr('src'),
-  				'data-lightbox': 'image-'+index
-  			})
-  			var caption = $(this).attr('alt')
-  			if (caption) link.attr('data-title', caption)
-  			$(this).appendTo(link)
-  		}).addClass('rounded mx-auto d-block') // make images look nice
-  		$('figure').each(function() { // remove stupid figure & figcapture tags
-  			$(this).after('<p></p>')
-  			$(this).next().append($(this).find('a'))
-  			$(this).remove()
-  		})
-  	})
-  </script>
-  <script src='js/lightbox.min.js'></script>
-  <script>
-  	lightbox.option({
-  		fadeDuration: 300,
-  		imageFadeDuration: 300
-  	})
-  </script>
 </head>
 <body>
+<div class='container'>
 <header>
 <h1 class="title">Analyzing the The Computer Language Benchmarks Game</h1>
 <p class="author">Jane Jeon</p>
@@ -444,8 +401,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <a class="sourceLine" id="cb11-63" data-line-number="63">)</a>
 <a class="sourceLine" id="cb11-64" data-line-number="64"><span class="kw">GROUP</span> <span class="kw">BY</span> <span class="dv">1</span></a>
 <a class="sourceLine" id="cb11-65" data-line-number="65"><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="dv">2</span>, <span class="dv">3</span>;</a></code></pre></div>
-<p><img src="assets/013.png" /></p>
-<p>Now that’s more like it! Since I’m using geometric mean, the cases in which the memory consumed was reportedly 0kB (ie. rounded down to 0) threw errors in my face. To account for that, I set the memory consumption to simply 0.5kB in those cases.</p>
+<figure>
+<img src="assets/013.png" alt="The final result! …for now" /><figcaption>The final result! …for now</figcaption>
+</figure>
+<p>Now that’s more like it! Since I’m using geometric mean (and that involves taking the log of individual values), the cases in which the memory consumed was reportedly 0kB (ie. rounded down to 0) threw errors in my face. To account for that, I set the memory consumption to simply 0.5kB in those cases.</p>
 <p>To me, several details popped out about this data. For one, what the heck is Chapel and why is it on the top of the list? <a href="https://en.wikipedia.org/wiki/Chapel_(programming_language)">A quick Googling</a> tells us that it’s some fancy language made by Cray (<em>that</em> company who makes supercomputers), and given that the tests were run on a quad-core machine, I guess its implementations of the tests took good advantage of the parallelism.</p>
 <p>The same goes for Rust, beating out even grandaddy C (but consuming much more memory) and coming in the number 2 spot. C ran at basically the same speed as C++ while using less memory, as expected. The next surprise is golang coming in so close to C++ in performance, and even beating it out in memory consumption! My understanding was that it basically traded blows with Java, but I guess that information is wrong! Java is basically where I’d expected it to be - ~2x slower than C/C++, while consuming a lot more memory (after all, it has a full VM to manage, with the overhead of countless objects in the heap).</p>
 <p>And the rest are just scripting languages (interpreted), as expected. It’s hard for the compiler/interpreter to optimize the running code when it doesn’t know much. I’m not used to Racket, but it seems to be handily beating down everyone else in speed. I’m not sure what causes its comparatively high memory consumption, however.</p>
@@ -453,7 +412,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>I thought python and ruby (yarv) would blow trades, but I was wrong, once again - python is clearly the faster and the more memory-efficient of the two. However, with Ruby 3x3 showing promising progress in the JIT department, I’ll be looking forward to Ruby making strides beyond the current python performance line, at the very least.</p>
 <p>Finally, surprising <em>literally nobody</em>, perl is dead last. Honestly, did anyone think it would end up anywhere else other than <em>dead last</em> when they first saw perl on the list halfway through the article?</p>
 <p>And that’s where I am with analyzing the Benchmark Game data! I still have a few ways to go - namely, taking into account of the languages that <em>didn’t</em> have implementations for all of the tests - and it’ll be an even more daunting task, I’m sure. However, as I’m just a college student with tight deadlines (in fact, I’ve got a paper due tomorrow morning), I will leave it here for now. I’ll perhaps pick this back up when I have time again.</p>
+<!---
+TODO: test exclusions, more conclusions -->
 <hr />
 <p>Funny afterword: although I got started with analyzing this data because of the threat of the website going down, as of time of writing this article, it seems someone else has started <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/">hosting the site again</a>. Well, I don’t think this effort was a waste. After all, if anything, it was a good learning experience.</p>
+</div>
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+<script src='js/site.js'></script>
+<script src='js/lightbox.min.js'></script>
+<script>
+	lightbox.option({
+		fadeDuration: 300,
+		imageFadeDuration: 300
+	})
+</script>
 </body>
 </html>
