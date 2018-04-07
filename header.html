@@ -1,0 +1,48 @@
+<meta name='viewport' content='shrink-to-fit=no'>
+<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css'>
+<link rel='stylesheet' href='css/lightbox.min.css'>
+<style>
+	img {
+		max-width: 60%;
+		max-height: 50vh;
+		box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.2), 0 8px 26px 0 rgba(0, 0, 0, 0.19);
+		text-align: center;
+	}
+	/* TODO: stylize author & date */
+</style>
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+<script>
+	$(function() {
+		$('a').attr('target', '_blank')
+		var title = $('header').html()
+		$('header').remove() // remove the stupid header tag from the title
+		var body = $('body').html()
+		$('body').html('<div class="container"></div>')
+		$('.container').append(title, body) // and move the whole body inside a container
+		// allow lightbox initialization - needs to come before loading the script
+		// because we need <a><img></a>, not <img>, which is what pandoc generates
+		$('img').each(function(index) {
+			$(this).after('<a></a>') // TODO: how to limit the clicking area just to the image?
+			var link = $(this).next()
+			link.attr({
+				href: $(this).attr('src'),
+				'data-lightbox': 'image-'+index
+			})
+			var caption = $(this).attr('alt')
+			if (caption) link.attr('data-title', caption)
+			$(this).appendTo(link)
+		}).addClass('rounded mx-auto d-block') // make images look nice
+		$('figure').each(function() { // remove stupid figure & figcapture tags
+			$(this).after('<p></p>')
+			$(this).next().append($(this).find('a'))
+			$(this).remove()
+		})
+	})
+</script>
+<script src='js/lightbox.min.js'></script>
+<script>
+	lightbox.option({
+		fadeDuration: 300,
+		imageFadeDuration: 300
+	})
+</script>
