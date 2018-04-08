@@ -1,5 +1,6 @@
 $(function() {
 	$('header').prependTo($('.container'))
+	$('nav').prependTo($('.container'))
 	$('header h1').attr('class', 'mt-5')
 	$('.author').attr('class', 'author lead')
 	$('.date').attr('class', 'text-muted')
