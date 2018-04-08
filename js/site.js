@@ -5,6 +5,7 @@ $(function() {
 	$('.author').attr('class', 'author lead')
 	$('.date').attr('class', 'text-muted')
 	$('a').attr('target', '_blank')
+	$('a.navbar-brand').removeAttr('target')
 	
 	// allow lightbox initialization - needs to come before loading the script
 	// because we need <a><img></a>, not <img>, which is what pandoc generates
