@@ -78,25 +78,25 @@ code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/lightbox.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
   <!--[if lt IE 9]>
     <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
   <![endif]-->
   <meta name='viewport' content='shrink-to-fit=no'>
-  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css'>
-  <link rel='stylesheet' href='css/lightbox.min.css'>
 </head>
 <body>
+<div class='container'>
 <nav class='navbar navbar-light'>
 	<a class='navbar-brand' href='https://JaneJeon.github.io'>Jane's Development Blog</a>
 	<span class='navbar-text'>
 		<a class='nav-item active' href='https://github.com/JaneJeon'>GitHub</a>
 	</span>
 </nav>
-<div class='container'>
 <header>
 <h1 class="title">Analyzing the The Computer Language Benchmarks Game</h1>
 <p class="author">Jane Jeon</p>
-<p class="date">April 7, 2018, with &lt;3 from Dartmouth</p>
+<p class="date">April 11, 2018, with &lt;3 from Dartmouth</p>
 </header>
 <p>I have always been interested in programming languages, and in particular, how they perform (or not). And no matter what you Googled, what kind of discussions you would get into on the issue, you would often see references to <a href="http://benchmarksgame.alioth.debian.org/">Computer Language Benchmarks Game</a>. Although far from perfect (for example, it seems to just <code>time</code> the program running time, which meant that language runtimes that JIT compiled its code were inherently disadvantaged due to the warm-up time), it served as a de-facto starting point for discussions.</p>
 <p>I have previously made efforts to try to analyze the data up on the site, including <a href="https://github.com/JaneJeon/Benchmark-Game-Summary">this attempt</a> (which produces the report below) in which I literally just averaged the scores on each <em>lang1 vs. lang2</em> page, and as crude as it was (I <em>am</em> a college student strapped on time, after all), it gave me a <em>general</em> idea of the performance landscape, and I thought it was good enough <em>for now</em> and that maybe I’ll get to properly exploring it later.</p>

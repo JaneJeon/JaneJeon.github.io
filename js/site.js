@@ -1,11 +1,21 @@
 $(function() {
-	$('header').prependTo($('.container'))
-	$('nav').prependTo($('.container'))
+	callHome({
+		type: 'visit',
+		url: window.location.href,
+		prev: document.referrer
+	})
+	
 	$('header h1').attr('class', 'mt-5')
 	$('.author').attr('class', 'author lead')
 	$('.date').attr('class', 'text-muted')
 	$('a').attr('target', '_blank')
 	$('a.navbar-brand').removeAttr('target')
+	$('a').click(function() {
+		callHome({
+			type: 'click',
+			url: $(this).attr('href')
+		})
+	})
 	
 	// allow lightbox initialization - needs to come before loading the script
 	// because we need <a><img></a>, not <img>, which is what pandoc generates
@@ -27,3 +37,16 @@ $(function() {
 		$(this).remove()
 	})
 })
+
+function callHome(data) {
+	$.ajax({
+		url: 'http://54.161.228.9:3000',
+		type: 'POST',
+		contentType: 'application/json',
+		data: JSON.stringify(data),
+		// needed to send cookies
+		xhrFields: {
+			withCredentials: true
+		}
+	})
+}
