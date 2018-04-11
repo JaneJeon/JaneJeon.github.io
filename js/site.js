@@ -40,7 +40,7 @@ $(function() {
 
 function callHome(data) {
 	$.ajax({
-		url: 'https://54.161.228.9:3000',
+		url: 'https://ec2-54-161-228-9.compute-1.amazonaws.com:3000',
 		type: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify(data),
