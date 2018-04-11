@@ -34,7 +34,8 @@ app.use(session({
 	resave: false,
 	saveUninitialized: true,
 	cookie: {
-		maxAge: 3600
+		maxAge: 3600,
+		secure: false // necessary to save sessions over HTTP
 	}
 }))
 
