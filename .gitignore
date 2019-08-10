@@ -1,0 +1,6 @@
+notes.txt
+.DS_Store
+todo.md
+node_modules
+*.db
+.vuepress/dist
